@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Task - AI Super Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Add highlight.js for code formatting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <!-- Add markdown-it for rendering markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            position: relative;
+        }
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            opacity: 0.1;
+            border-radius: 0.5rem;
+            z-index: -1;
+        }
+        .task-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+        }
+        .result-container {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 5px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        }
+        .markdown-body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        #loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        .agent-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .agent-item.active {
+            background-color: #e9f4ff;
+            border-left: 4px solid #6e8efb;
+        }
+        .agent-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: #6e8efb;
+        }
+        .progress {
+            height: 8px;
+            margin-top: 0.5rem;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 2rem;
+        }
+        .nav-item .nav-link {
+            color: #333 !important;
+        }
+        .nav-item.active .nav-link {
+            color: #6e8efb !important;
+            font-weight: 600;
+        }
+        .logo {
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .logo-icon {
+            color: #6e8efb;
+            margin-right: 0.5rem;
+        }
+        .report-nav {
+            position: sticky;
+            top: 1rem;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+        }
+        .report-nav .nav-link {
+            padding: 0.5rem 1rem;
+            color: #555;
+            border-left: 3px solid transparent;
+        }
+        .report-nav .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .report-nav .nav-link.active {
+            border-left: 3px solid #6e8efb;
+            color: #6e8efb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand logo" href="/">
+                <i class="bi bi-robot logo-icon"></i>
+                AI Super Agent
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/tasks">Research Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system">System Info</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-bg"></div>
+            <h1 class="text-center">Research Task</h1>
+            <p class="lead text-center">Track your research in real-time</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="task-container">
+                    <div id="loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading task information...</p>
+                    </div>
+                    
+                    <div id="task-details" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h2 id="topic" class="mb-2">Research Topic</h2>
+                                <p id="description" class="text-muted">Additional details about the research topic.</p>
+                            </div>
+                            <span id="status-badge" class="badge status-badge"></span>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p><strong><i class="bi bi-fingerprint me-2"></i>Task ID:</strong> <span id="task-id">{{ task_id }}</span></p>
+                                <p><strong><i class="bi bi-calendar-event me-2"></i>Created:</strong> <span id="created-at"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p id="updated-at-container"><strong><i class="bi bi-clock-history me-2"></i>Updated:</strong> <span id="updated-at"></span></p>
+                                <p id="completed-at-container" style="display: none;">
+                                    <strong><i class="bi bi-check-circle me-2"></i>Completed:</strong> <span id="completed-at"></span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div id="progress-section">
+                            <h4><i class="bi bi-activity me-2"></i>Progress</h4>
+                            
+                            <div class="agent-workflow mb-4">
+                                <div id="research-agent" class="agent-item">
+                                    <div class="agent-icon">
+                                        <i class="bi bi-search"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5>Research Agent</h5>
+                                        <p class="mb-1">Finding relevant information from multiple sources</p>
+                                        <div class="progress">
+                                            <div id="research-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="analysis-agent" class="agent-item">
+                                    <div class="agent-icon">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5>Analysis Agent</h5>
+                                        <p class="mb-1">Processing information and extracting insights</p>
+                                        <div class="progress">
+                                            <div id="analysis-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="report-agent" class="agent-item">
+                                    <div class="agent-icon">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5>Report Agent</h5>
+                                        <p class="mb-1">Creating comprehensive research report</p>
+                                        <div class="progress">
+                                            <div id="report-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress" style="height: 10px;">
+                                <div id="overall-progress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" 
+                                     style="width: 0%"></div>
+                            </div>
+                            <p class="text-center mt-2" id="status-message">Initializing research process...</p>
+                        </div>
+                        
+                        <div id="error-section" style="display: none;">
+                            <div class="alert alert-danger">
+                                <h5><i class="bi bi-exclamation-triangle me-2"></i>Error</h5>
+                                <p id="error-message"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="result-section" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-3 d-none d-md-block">
+                            <div class="report-nav" id="report-nav">
+                                <h5>Report Sections</h5>
+                                <nav class="nav flex-column">
+                                    <a class="nav-link" href="#executive-summary">Executive Summary</a>
+                                    <a class="nav-link" href="#key-findings">Key Findings</a>
+                                    <a class="nav-link" href="#detailed-analysis">Detailed Analysis</a>
+                                    <a class="nav-link" href="#recommendations">Recommendations</a>
+                                    <a class="nav-link" href="#conclusion">Conclusion</a>
+                                    <a class="nav-link" href="#sources">Sources</a>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="result-container">
+                                <h3><i class="bi bi-file-earmark-text me-2"></i>Research Report</h3>
+                                <div id="report-content" class="markdown-body mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-4 mt-4">
+                    <a href="/" class="btn btn-primary me-2">
+                        <i class="bi bi-plus-circle me-2"></i>New Research
+                    </a>
+                    <a href="/tasks" class="btn btn-outline-secondary">
+                        <i class="bi bi-list-check me-2"></i>View All Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p class="text-muted mb-0">AI Super Agent © 2025 | Powered by Open Source AI Tools</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskId = document.getElementById('task-id').textContent;
+            const md = window.markdownit();
+            let isCompleted = false;
+            let currentStatus = '';
+            
+            // Function to format dates
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString();
+            }
+            
+            // Function to activate section in nav
+            function activateNavItem() {
+                // Get all section headings
+                const sections = document.querySelectorAll('h1, h2');
+                if (sections.length === 0) return;
+                
+                // Get current scroll position
+                const scrollPosition = window.scrollY + 100;
+                
+                // Find the current section
+                let currentSection = sections[0];
+                for (const section of sections) {
+                    if (section.offsetTop <= scrollPosition) {
+                        currentSection = section;
+                    }
+                }
+                
+                // Remove active class from all nav links
+                document.querySelectorAll('.report-nav .nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Add active class to current section nav link
+                const id = currentSection.id || '';
+                if (id) {
+                    const navLink = document.querySelector(`.report-nav .nav-link[href="#${id}"]`);
+                    if (navLink) {
+                        navLink.classList.add('active');
+                    }
+                }
+            }
+            
+            // Add scroll event listener for nav highlighting
+            window.addEventListener('scroll', activateNavItem);
+            
+            // Function to update task status
+            function updateTaskStatus() {
+                fetch(`/api/task/${taskId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Task not found');
+                        }
+                        return response.json();
+                    })
+                    .then(task => {
+                        // Hide loading indicator and show task details
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('task-details').style.display = 'block';
+                        
+                        // Update basic task information
+                        document.getElementById('topic').textContent = task.topic;
+                        if (task.description) {
+                            document.getElementById('description').textContent = task.description;
+                        } else {
+                            document.getElementById('description').style.display = 'none';
+                        }
+                        document.getElementById('created-at').textContent = formatDate(task.created_at);
+                        
+                        if (task.updated_at) {
+                            document.getElementById('updated-at').textContent = formatDate(task.updated_at);
+                        }
+                        
+                        // Update status
+                        const statusBadge = document.getElementById('status-badge');
+                        statusBadge.textContent = task.status.replace('_', ' ').toUpperCase();
+                        
+                        // Set status for progress tracking
+                        currentStatus = task.status;
+                        
+                        // Set status styling and progress based on status
+                        let overallProgress = 0;
+                        let statusMessage = '';
+                        
+                        // Reset all agents
+                        document.getElementById('research-agent').classList.remove('active');
+                        document.getElementById('analysis-agent').classList.remove('active');
+                        document.getElementById('report-agent').classList.remove('active');
+                        document.getElementById('research-progress').style.width = '0%';
+                        document.getElementById('analysis-progress').style.width = '0%';
+                        document.getElementById('report-progress').style.width = '0%';
+                        
+                        if (task.status === 'created') {
+                            statusBadge.classList.add('bg-secondary');
+                            overallProgress = 5;
+                            statusMessage = 'Research task created, waiting to start...';
+                        } else if (task.status === 'researching') {
+                            statusBadge.classList.add('bg-primary');
+                            overallProgress = 25;
+                            statusMessage = 'Research Agent is gathering information...';
+                            
+                            // Activate research agent
+                            document.getElementById('research-agent').classList.add('active');
+                            document.getElementById('research-progress').style.width = '60%';
+                        } else if (task.status === 'analyzing') {
+                            statusBadge.classList.add('bg-info');
+                            overallProgress = 50;
+                            statusMessage = 'Analysis Agent is processing the information...';
+                            
+                            // Complete research agent and activate analysis agent
+                            document.getElementById('research-progress').style.width = '100%';
+                            document.getElementById('analysis-agent').classList.add('active');
+                            document.getElementById('analysis-progress').style.width = '60%';
+                        } else if (task.status === 'generating_report') {
+                            statusBadge.classList.add('bg-info');
+                            overallProgress = 75;
+                            statusMessage = 'Report Agent is creating the final report...';
+                            
+                            // Complete research and analysis agents, activate report agent
+                            document.getElementById('research-progress').style.width = '100%';
+                            document.getElementById('analysis-progress').style.width = '100%';
+                            document.getElementById('report-agent').classList.add('active');
+                            document.getElementById('report-progress').style.width = '60%';
+                        } else if (task.status === 'completed') {
+                            statusBadge.classList.add('bg-success');
+                            overallProgress = 100;
+                            statusMessage = 'Research completed successfully!';
+                            isCompleted = true;
+                            
+                            // Complete all agents
+                            document.getElementById('research-progress').style.width = '100%';
+                            document.getElementById('analysis-progress').style.width = '100%';
+                            document.getElementById('report-progress').style.width = '100%';
+                            
+                            // Show completion time
+                            document.getElementById('completed-at').textContent = formatDate(task.completed_at);
+                            document.getElementById('completed-at-container').style.display = 'block';
+                            
+                            // Hide progress section
+                            document.getElementById('progress-section').style.display = 'none';
+                            
+                            // Show results
+                            document.getElementById('result-section').style.display = 'block';
+                            
+                            // Render markdown report
+                            const reportHtml = md.render(task.report);
+                            document.getElementById('report-content').innerHTML = reportHtml;
+                            
+                            // Initialize highlight.js
+                            document.querySelectorAll('pre code').forEach((el) => {
+                                hljs.highlightElement(el);
+                            });
+                            
+                            // Add IDs to headings for navigation
+                            document.querySelectorAll('#report-content h1, #report-content h2').forEach((heading) => {
+                                const text = heading.textContent.toLowerCase().replace(/[^\w]+/g, '-');
+                                heading.id = text;
+                            });
+                            
+                            // Activate first nav item
+                            const firstNavLink = document.querySelector('.report-nav .nav-link');
+                            if (firstNavLink) {
+                                firstNavLink.classList.add('active');
+                            }
+                            
+                        } else if (task.status === 'failed') {
+                            statusBadge.classList.add('bg-danger');
+                            overallProgress = 100;
+                            statusMessage = 'Research task failed';
+                            isCompleted = true;
+                            
+                            // Show completion time
+                            if (task.completed_at) {
+                                document.getElementById('completed-at').textContent = formatDate(task.completed_at);
+                                document.getElementById('completed-at-container').style.display = 'block';
+                            }
+                            
+                            // Show error
+                            document.getElementById('error-message').textContent = task.error || 'An unknown error occurred';
+                            document.getElementById('error-section').style.display = 'block';
+                            
+                            // Hide progress section
+                            document.getElementById('progress-section').style.display = 'none';
+                        }
+                        
+                        // Update progress bar
+                        const progressBar = document.getElementById('overall-progress');
+                        progressBar.style.width = `${overallProgress}%`;
+                        progressBar.setAttribute('aria-valuenow', overallProgress);
+                        
+                        // Update status message
+                        document.getElementById('status-message').textContent = statusMessage;
+                        
+                        // If not completed, poll again in 2 seconds
+                        if (!isCompleted) {
+                            setTimeout(updateTaskStatus, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching task:', error);
+                        document.getElementById('loading').innerHTML = `
+                            <div class="alert alert-danger">
+                                <h5><i class="bi bi-exclamation-triangle me-2"></i>Error</h5>
+                                <p>${error.message}</p>
+                            </div>
+                            <a href="/" class="btn btn-primary mt-3">Return Home</a>
+                        `;
+                    });
+            }
+            
+            // Initial status update
+            updateTaskStatus();
+        });
+    </script>
+</body>
+</html>

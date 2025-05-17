@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Research Tasks - AI Super Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            position: relative;
+        }
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            opacity: 0.1;
+            border-radius: 0.5rem;
+            z-index: -1;
+        }
+        .tasks-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .task-card {
+            margin-bottom: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .task-card .card-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background-color: rgba(0,0,0,0.02);
+        }
+        .no-tasks {
+            padding: 3rem;
+            text-align: center;
+            color: #6c757d;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 2rem;
+        }
+        .nav-item .nav-link {
+            color: #333 !important;
+        }
+        .nav-item.active .nav-link {
+            color: #6e8efb !important;
+            font-weight: 600;
+        }
+        .logo {
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .logo-icon {
+            color: #6e8efb;
+            margin-right: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border: none;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #5d7dfa, #9666e2);
+        }
+        .status-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+        .filters {
+            margin-bottom: 2rem;
+        }
+        .task-count {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand logo" href="/">
+                <i class="bi bi-robot logo-icon"></i>
+                AI Super Agent
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/tasks">Research Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system">System Info</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-bg"></div>
+            <h1 class="text-center">Research Tasks</h1>
+            <p class="lead text-center">View and manage all your research tasks</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="tasks-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>
+                            <i class="bi bi-list-check me-2"></i>All Tasks
+                            <span id="task-count" class="task-count"></span>
+                        </h2>
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>New Research
+                        </a>
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="btn-group" role="group" aria-label="Filter tasks">
+                            <button type="button" class="btn btn-outline-secondary active" data-filter="all">All</button>
+                            <button type="button" class="btn btn-outline-secondary" data-filter="completed">Completed</button>
+                            <button type="button" class="btn btn-outline-secondary" data-filter="active">In Progress</button>
+                        </div>
+                    </div>
+                    
+                    <div id="task-list" class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p class="text-muted mb-0">AI Super Agent © 2025 | Powered by Open Source AI Tools</p>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to format dates
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString();
+            }
+            
+            // Function to get status badge class
+            function getStatusBadgeClass(status) {
+                switch(status) {
+                    case 'completed':
+                        return 'bg-success';
+                    case 'failed':
+                        return 'bg-danger';
+                    case 'researching':
+                    case 'analyzing':
+                    case 'generating_report':
+                        return 'bg-primary';
+                    default:
+                        return 'bg-secondary';
+                }
+            }
+            
+            // Function to get status icon
+            function getStatusIcon(status) {
+                switch(status) {
+                    case 'completed':
+                        return 'bi-check-circle-fill text-success';
+                    case 'failed':
+                        return 'bi-exclamation-triangle-fill text-danger';
+                    case 'researching':
+                        return 'bi-search text-primary';
+                    case 'analyzing':
+                        return 'bi-graph-up text-primary';
+                    case 'generating_report':
+                        return 'bi-file-earmark-text text-primary';
+                    default:
+                        return 'bi-hourglass-split text-secondary';
+                }
+            }
+            
+            // Function to load and display tasks
+            function loadTasks() {
+                fetch('/api/tasks')
+                    .then(response => response.json())
+                    .then(tasks => {
+                        // Update task count
+                        document.getElementById('task-count').textContent = `(${tasks.length})`;
+                        
+                        // Clear task list
+                        const taskListElement = document.getElementById('task-list');
+                        taskListElement.innerHTML = '';
+                        
+                        if (tasks.length === 0) {
+                            taskListElement.innerHTML = `
+                                <div class="col-12">
+                                    <div class="no-tasks">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3 text-muted"></i>
+                                        <h4>No research tasks found</h4>
+                                        <p>Start a new research task to see results here.</p>
+                                        <a href="/" class="btn btn-primary mt-3">
+                                            <i class="bi bi-plus-circle me-2"></i>Start New Research
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Sort tasks by created_at (newest first)
+                        tasks.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        
+                        // Add tasks to the list
+                        tasks.forEach(task => {
+                            const statusClass = getStatusBadgeClass(task.status);
+                            const statusIcon = getStatusIcon(task.status);
+                            const statusText = task.status.replace('_', ' ').toUpperCase();
+                            
+                            const taskElement = document.createElement('div');
+                            taskElement.className = `col-md-6 mb-3 task-item ${task.status}`;
+                            taskElement.innerHTML = `
+                                <div class="card task-card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge ${statusClass}">${statusText}</span>
+                                        <small>Created: ${formatDate(task.created_at)}</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="status-icon">
+                                                <i class="bi ${statusIcon}"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="card-title">${task.topic}</h5>
+                                                <p class="card-text text-muted small">
+                                                    ${task.description || 'No additional description provided.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <a href="/task/${task.id}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye me-1"></i>View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            taskListElement.appendChild(taskElement);
+                        });
+                        
+                        // Initialize filtering
+                        const filterButtons = document.querySelectorAll('[data-filter]');
+                        filterButtons.forEach(button => {
+                            button.addEventListener('click', function() {
+                                // Update active button
+                                filterButtons.forEach(btn => btn.classList.remove('active'));
+                                this.classList.add('active');
+                                
+                                // Get filter value
+                                const filter = this.getAttribute('data-filter');
+                                
+                                // Filter tasks
+                                const taskItems = document.querySelectorAll('.task-item');
+                                taskItems.forEach(item => {
+                                    if (filter === 'all') {
+                                        item.style.display = 'block';
+                                    } else if (filter === 'completed') {
+                                        item.style.display = item.classList.contains('completed') ? 'block' : 'none';
+                                    } else if (filter === 'active') {
+                                        item.style.display = !item.classList.contains('completed') && !item.classList.contains('failed') ? 'block' : 'none';
+                                    }
+                                });
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading tasks:', error);
+                        document.getElementById('task-list').innerHTML = `
+                            <div class="col-12">
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-exclamation-triangle me-2"></i>Error</h5>
+                                    <p>Failed to load tasks: ${error.message}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Load tasks
+            loadTasks();
+            
+            // Refresh tasks every 10 seconds
+            setInterval(loadTasks, 10000);
+        });
+    </script>
+</body>
+</html>

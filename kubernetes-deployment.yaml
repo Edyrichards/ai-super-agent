@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-agent-secrets
+type: Opaque
+data:
+  # Note: In a real deployment, you would base64 encode these values
+  # Example: echo -n "your-api-key" | base64
+  OPENAI_API_KEY: "your-base64-encoded-openai-api-key"
+  SERPER_API_KEY: "your-base64-encoded-serper-api-key"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: research-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-super-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-super-agent
+  template:
+    metadata:
+      labels:
+        app: ai-super-agent
+    spec:
+      containers:
+      - name: ai-super-agent
+        image: ai-super-agent:latest  # Use your Docker image here
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: research-db
+          mountPath: /app/research_db
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-agent-secrets
+              key: OPENAI_API_KEY
+        - name: SERPER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-agent-secrets
+              key: SERPER_API_KEY
+      volumes:
+      - name: research-db
+        persistentVolumeClaim:
+          claimName: research-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-super-agent-service
+spec:
+  selector:
+    app: ai-super-agent
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: LoadBalancer
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-super-agent-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-super-agent
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

@@ -1,0 +1,26 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file and add Flask
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir flask
+
+# Copy application code
+COPY . .
+
+# Create volume for persistent storage
+VOLUME /app/research_db
+
+# Expose the Flask port
+EXPOSE 8001
+
+# Command to run the web application
+CMD ["python", "web_app.py"]

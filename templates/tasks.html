@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Tasks - AI Super Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 960px;
+            margin-top: 2rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: #4a4a4a;
+            font-weight: bold;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+        .card-header {
+            background-color: #4285f4;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.65rem;
+        }
+        .badge-queued {
+            background-color: #6c757d;
+        }
+        .badge-in_progress {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-completed {
+            background-color: #28a745;
+        }
+        .badge-failed {
+            background-color: #dc3545;
+        }
+        .task-card {
+            transition: transform 0.3s ease;
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+        }
+        .no-tasks {
+            text-align: center;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>All Tasks</h1>
+            <p>View and manage your AI Super Agent tasks</p>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/" class="btn btn-outline-primary">New Task</a>
+            <button class="btn btn-outline-secondary" id="refresh-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+
+        {% if tasks|length > 0 %}
+            <div class="row">
+                {% for task_id, task in tasks.items() %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card task-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="text-truncate" style="max-width: 200px;">{{ task.topic }}</span>
+                                <span class="badge status-badge badge-{{ task.status }}">{{ task.status }}</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-truncate">Task ID: <code>{{ task.task_id }}</code></p>
+                                <p class="card-text">Created: <span class="created-time">{{ task.created_at }}</span></p>
+                                <div class="d-grid">
+                                    <a href="/task/{{ task.task_id }}" class="btn btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-tasks">
+                <h5>No tasks yet</h5>
+                <p>Start by creating a new task for the AI Super Agent.</p>
+                <a href="/" class="btn btn-primary mt-2">Create Your First Task</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Format timestamps
+        function formatTimestamp(isoString) {
+            if (!isoString || isoString === 'N/A') return 'N/A';
+            const date = new Date(isoString);
+            return date.toLocaleString();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format all timestamps on page
+            const createdTimes = document.querySelectorAll('.created-time');
+            createdTimes.forEach(span => {
+                span.textContent = formatTimestamp(span.textContent);
+            });
+
+            // Refresh button
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                window.location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
